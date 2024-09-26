@@ -16,8 +16,13 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { signinUser } from "../../../src/lib/actions/authentication" 
+import { startTransition, useState } from "react";
 
 const SignInPage = () => {
+
+    const [error, setError] = useState<string | undefined>("");
+    const [success, setSuccess] = useState<string | undefined>("");
+
 
     const form = useForm<z.infer<typeof signInFormSchema>>({
         resolver: zodResolver(signInFormSchema),
@@ -27,9 +32,19 @@ const SignInPage = () => {
         },
     })
 
-    const onSubmit = async (values: z.infer<typeof signInFormSchema>) => {
-        console.log("Values: ", values)
-        signinUser(values.email, values.password)
+    const onSubmit = (values: z.infer<typeof signInFormSchema>) => {
+        setError("");
+        setSuccess("");
+        startTransition(async () => {
+            console.log("Values: ", values)
+        const value = await signinUser(values);
+        if(value?.error){
+            setError(value.error)
+        }
+        if(value?.success){
+            setSuccess(value.success)
+        }
+        })
     }
 
     return (
@@ -73,6 +88,17 @@ const SignInPage = () => {
                             </FormItem>
                         )}
                     />
+                    {
+                        error ? <div className="bg-red-500 p-4 w-[300px]">
+                            {/* <ErrorMsg /> */}
+                            {error}
+                        </div>: null
+                    }
+                    {
+                        success ? <div className="bg-green-400 py-2 px-2 w-[300px] rounded-lg font-mono">
+                            {success}
+                        </div>: null
+                    }
                     <Button type="submit" className="w-[300px]">Submit</Button>
                 </form>
             </Form>
