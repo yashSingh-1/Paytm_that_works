@@ -15,11 +15,13 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { signinUser } from "../../../src/lib/actions/authentication"
+import { signinUser, SignupUser } from "../../../src/lib/actions/authentication"
 import { startTransition, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const SignUp = () => {
+    const router = useRouter();
 
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
@@ -39,12 +41,15 @@ const SignUp = () => {
         setSuccess("");
         startTransition(async () => {
             console.log("Values: ", values)
-            const value = await signinUser(values);
+            const value = await SignupUser(values);
             if (value?.error) {
                 setError(value.error)
             }
             if (value?.success) {
                 setSuccess(value.success)
+                if(value.success == "User Created"){
+                    router.push("/")
+                }
             }
         })
     }

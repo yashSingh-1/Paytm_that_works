@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^5.19.1"
+    "@prisma/client": "^5.20"
   },
   "exports": {
     "./client": "./src/client.ts"
