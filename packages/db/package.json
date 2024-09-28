@@ -13,6 +13,7 @@
     "@prisma/client": "^5.20"
   },
   "exports": {
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./user": "./src/actions/user.actions.ts"
   }
 }

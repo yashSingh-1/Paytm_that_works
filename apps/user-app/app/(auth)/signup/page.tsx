@@ -25,6 +25,7 @@ const SignUp = () => {
 
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
+    const [loading, setLoading] = useState(false);
 
 
     const form = useForm<z.infer<typeof SignUpFormSchema>>({
@@ -39,17 +40,20 @@ const SignUp = () => {
     const onSubmit = (values: z.infer<typeof SignUpFormSchema>) => {
         setError("");
         setSuccess("");
+        setLoading(true);
         startTransition(async () => {
             console.log("Values: ", values)
             const value = await SignupUser(values);
             if (value?.error) {
                 setError(value.error)
+                setLoading(false)
             }
             if (value?.success) {
                 setSuccess(value.success)
                 if(value.success == "User Created"){
                     router.push("/")
                 }
+                setLoading(false);
             }
         })
     }
@@ -80,7 +84,7 @@ const SignUp = () => {
                             <FormItem>
                                 <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Your Name" {...field} />
+                                    <Input placeholder="Your Name" {...field} disabled={loading}/>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -93,7 +97,7 @@ const SignUp = () => {
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Email" {...field} type="email" />
+                                    <Input placeholder="Email" {...field} type="email" disabled={loading} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -106,7 +110,7 @@ const SignUp = () => {
                             <FormItem>
                                 <FormLabel>Password</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Password" {...field} type="password" />
+                                    <Input placeholder="Password" {...field} type="password" disabled={loading}/>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -123,7 +127,7 @@ const SignUp = () => {
                             {success}
                         </div> : null
                     }
-                    <Button type="submit" className="w-[300px]">Submit</Button>
+                    <Button type="submit" className="w-[300px]" disabled={loading}>Submit</Button>
                 </form>
             </Form>
             <div className="text-xs flex m-1 flex justify-end">

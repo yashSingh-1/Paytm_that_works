@@ -5,6 +5,7 @@ import { signIn } from "../../../auth"
 import { signInFormSchema, SignUpFormSchema } from "../validation"
 import { client } from "@repo/db/client"
 import bcrypt from "bcrypt"
+import { getUserByEmail } from "@repo/db/user"
 
 export const SignupUser = async (values: z.infer<typeof SignUpFormSchema>) => {
     const fields = SignUpFormSchema.safeParse(values);
@@ -16,11 +17,13 @@ export const SignupUser = async (values: z.infer<typeof SignUpFormSchema>) => {
     const hashedPass = await bcrypt.hash(password!, 10)
 
 
-    const user = await client.user.findUnique({
-        where: {
-            email: fields.data?.email
-        }
-    })
+    // const user = await client.user.findUnique({
+    //     where: {
+    //         email: fields.data?.email
+    //     }
+    // })
+
+    const user = await getUserByEmail(email!);
 
     if(user){
         return {error: "Email already in use!"}
