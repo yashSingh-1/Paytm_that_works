@@ -6,6 +6,7 @@ import { signInFormSchema, SignUpFormSchema } from "../validation"
 import { client } from "@repo/db/client"
 import bcrypt from "bcrypt"
 import { getUserByEmail } from "@repo/db/user"
+import { error } from "console"
 
 export const SignupUser = async (values: z.infer<typeof SignUpFormSchema>) => {
     const fields = SignUpFormSchema.safeParse(values);
@@ -54,6 +55,16 @@ export const signinUser = async (values: z.infer<typeof signInFormSchema>) => {
         return {error: "Invalid Fields"}
     }
 
+    const pass = validatedFields.data.password;
+    const encryptedPass = bcrypt.compare(pass, pass)
+
+    const signinUserByMain = await client.user.findUnique({
+        where:{
+            email: validatedFields.data.email,
+            password: pass
+        }
+    })
+
     // const isSignIn = await signIn("credentials", {
     //     email, pass
     // })
@@ -61,7 +72,9 @@ export const signinUser = async (values: z.infer<typeof signInFormSchema>) => {
 
 
     // console.log(isSignIn)
-    if(validatedFields.success){
-    return {success: "Authenticated!"}
+    if(signinUserByMain){
+        return {success: "Authenticated!"}
+    }else {
+        return {error: "Something went wrong"}
     }
 }
