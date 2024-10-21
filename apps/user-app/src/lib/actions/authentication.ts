@@ -4,7 +4,7 @@ import { z } from "zod"
 import { signIn } from "../../../auth"
 import { signInFormSchema, SignUpFormSchema } from "../validation"
 import { client } from "@repo/db/client"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { getUserByEmail } from "@repo/db/user"
 import { error } from "console"
 
@@ -47,34 +47,43 @@ export const SignupUser = async (values: z.infer<typeof SignUpFormSchema>) => {
     // Send verification token email
 }
 
+//Login user
 export const signinUser = async (values: z.infer<typeof signInFormSchema>) => {
-    const validatedFields = signInFormSchema.safeParse(values);
+    try {
+        const validatedFields = signInFormSchema.safeParse(values);
 
     
     if(!validatedFields.success){
         return {error: "Invalid Fields"}
     }
 
+    const user = await getUserByEmail(validatedFields.data.email);
+
+    if(!user){
+        return {error: "No user found with this email"};
+    }
+
+    const userPass = user.password;
+
+    const email = validatedFields.data.email;
     const pass = validatedFields.data.password;
-    const encryptedPass = bcrypt.compare(pass, pass)
+    const encryptedPass = bcrypt.compare(pass, userPass!)
 
-    const signinUserByMain = await client.user.findUnique({
-        where:{
-            email: validatedFields.data.email,
-            password: pass
-        }
-    })
-
-    // const isSignIn = await signIn("credentials", {
-    //     email, pass
+    // const signinUserByMain = await client.user.findUnique({
+    //     where:{
+    //         email: validatedFields.data.email,
+    //         password: pass
+    //     }
     // })
 
+    const isSignIn = await signIn("credentials", {
+        email, pass
+    })
 
 
-    // console.log(isSignIn)
-    if(signinUserByMain){
-        return {success: "Authenticated!"}
-    }else {
-        return {error: "Something went wrong"}
+
+    console.log("Using authJs signin fun", isSignIn)
+    } catch (error) {
+        
     }
 }

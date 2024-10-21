@@ -30,11 +30,17 @@ export default auth((req) => {
         return NextResponse.next();
     }
 
+    if(isPublicRoute){
+        return;
+    }
+
     if(!isLoggedIn && !publicRoutes){
+        console.log( "logged in: ",  isLoggedIn);
         return NextResponse.redirect(new URL("/signin", nextUrl))
     }
 
     if(!isLoggedIn){
+        console.log( "logged in: ",  isLoggedIn);
         return NextResponse.redirect(new URL("/signin", nextUrl))
     }
 
