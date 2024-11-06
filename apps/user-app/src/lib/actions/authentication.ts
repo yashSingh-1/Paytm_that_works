@@ -7,6 +7,8 @@ import { client } from "@repo/db/client"
 import bcrypt from "bcryptjs"
 import { getUserByEmail } from "@repo/db/user"
 import { error } from "console"
+import { DEFAULT_LOGIN_REDIRECT } from "../../../routes"
+import { AuthError } from "next-auth"
 
 export const SignupUser = async (values: z.infer<typeof SignUpFormSchema>) => {
     const fields = SignUpFormSchema.safeParse(values);
@@ -57,17 +59,17 @@ export const signinUser = async (values: z.infer<typeof signInFormSchema>) => {
         return {error: "Invalid Fields"}
     }
 
-    const user = await getUserByEmail(validatedFields.data.email);
+    // const user = await getUserByEmail(validatedFields.data.email);
 
-    if(!user){
-        return {error: "No user found with this email"};
-    }
+    // if(!user){
+    //     return {error: "No user found with this email"};
+    // }
 
-    const userPass = user.password;
+    // const userPass = user.password;
 
     const email = validatedFields.data.email;
     const pass = validatedFields.data.password;
-    const encryptedPass = bcrypt.compare(pass, userPass!)
+    // const encryptedPass = bcrypt.compare(pass, userPass!)
 
     // const signinUserByMain = await client.user.findUnique({
     //     where:{
@@ -77,13 +79,24 @@ export const signinUser = async (values: z.infer<typeof signInFormSchema>) => {
     // })
 
     const isSignIn = await signIn("credentials", {
-        email, pass
+        email, pass,
+        redirectTo: DEFAULT_LOGIN_REDIRECT
     })
 
 
 
     console.log("Using authJs signin fun", isSignIn)
     } catch (error) {
-        
+        if(error instanceof AuthError){
+            switch (error.type) {
+                case "CredentialsSignin":
+                    return { error : "Invalid Credentials"}
+            
+                default:
+                    return { error: "Something went wrong! "}
+            }
+        }
+
+        throw error; //It wont rediect you if you dont throw the error back, idk why
     }
 }
